@@ -43,3 +43,6 @@ A live version can be found [here](https://vermillion-khapse-9e6bb3.netlify.app)
 # 🚀 Future plans
 
 - [ ] Add a skill search feature to allow users to find skills by name or location.
+
+# 📝 License
+This project is licensed under the [MIT License](https://github.com/dividedby-0/in-demand-skills-tracker-frontend/blob/main/LICENSE).
