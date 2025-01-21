@@ -3,6 +3,8 @@
 ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
 ![Material](https://img.shields.io/badge/Angular%20Material-DD0031.svg?style=for-the-badge&logo=Angular&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![HTML](https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![Javascript](https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=for-the-badge&logo=JavaScript&logoColor=black)
 ![D3.js](https://img.shields.io/badge/D3.js-F9A03C.svg?style=for-the-badge&logo=d3dotjs&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
@@ -26,6 +28,8 @@ A live version can be found [here](https://vermillion-khapse-9e6bb3.netlify.app)
 ## 🎨 Frontend
 
 - Built with **Angular** and styled using **Angular Material**
+- Authenticates to backend using JWT
+- Route guards to prevent address tampering
 - Allows users to view, add, update, and manage skills and locations
 - Supports upvoting skills to reflect their demand
 - Features data visualizations with **D3.js** for clear insight into trends
