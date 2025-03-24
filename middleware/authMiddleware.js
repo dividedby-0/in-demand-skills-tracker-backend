@@ -1,18 +1,18 @@
 const jwt = require("jsonwebtoken");
+const CustomError = require("../errors");
 
 exports.verifyToken = (req, res, next) => {
   const token = req.headers.authorization;
 
   if (!token) {
-    return res.status(401).json({ message: "No token provided" });
+    throw new CustomError("No token provided", 401);
   }
 
   try {
-    const decoded = jwt.verify(token, "prova123");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.userId;
     next();
   } catch (error) {
-    console.error(error);
-    res.status(401).json({ message: "Invalid token" });
+    throw new CustomError("Invalid token", 401);
   }
 };

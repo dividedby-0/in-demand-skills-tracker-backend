@@ -1,63 +1,44 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const CustomError = require("../errors");
 
-// User registration
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
-
-    // Check if the username or email is already taken
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Username or email already taken" });
-    }
-
-    // Hash the password
+    const { username, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
+    const user = new User({ username, password: hashedPassword });
+    await user.save();
 
-    await newUser.save();
-    res.status(201).json({ message: "User registered successfully" });
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
+
+    res.json({ token });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(new CustomError('Failed to register user', 500));
   }
 };
 
-// User login
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
-    // Find user by username
     const user = await User.findOne({ username });
+
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      throw new CustomError('Invalid credentials', 401);
     }
 
-    // Check if password is correct
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid password" });
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
+    if (!isValidPassword) {
+      throw new CustomError('Invalid credentials', 401);
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, "prova123", {
-      expiresIn: "24h",
-    });
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
 
-    res.status(200).json({ token });
+    res.json({ token });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };

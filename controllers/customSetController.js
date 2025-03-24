@@ -1,154 +1,141 @@
 const CustomSet = require("../models/customSet");
+const CustomError = require("../errors");
 
-// Create a new set
-exports.createCustomSet = async (req, res) => {
+exports.createCustomSet = async (req, res, next) => {
   try {
     const { name } = req.body;
 
-    const newCustomSet = new CustomSet({
-      name,
-    });
+    if (!name) {
+      throw new CustomError("Name is required", 400);
+    }
 
+    const newCustomSet = new CustomSet({ name });
     await newCustomSet.save();
     res.status(201).json(newCustomSet);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// Update a set
-exports.updateCustomSet = async (req, res) => {
+exports.updateCustomSet = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
 
-    const updatedCustomSet = await CustomSet.findByIdAndUpdate(
-      id,
-      { name },
-      { new: true }
-    );
+    if (!name) {
+      throw new CustomError("Name is required", 400);
+    }
+
+    const updatedCustomSet = await CustomSet.findByIdAndUpdate(id, { name }, { new: true });
 
     if (!updatedCustomSet) {
-      return res.status(404).json({ message: "Custom set not found" });
+      throw new CustomError("Custom set not found", 404);
     }
 
     res.json(updatedCustomSet);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// Delete a set
-exports.deleteCustomSet = async (req, res) => {
+exports.deleteCustomSet = async (req, res, next) => {
   try {
     const { id } = req.params;
     const deletedCustomSet = await CustomSet.findByIdAndDelete(id);
+
     if (!deletedCustomSet) {
-      return res.status(404).json({ message: "Custom set not found" });
+      throw new CustomError("Custom set not found", 404);
     }
+
     res.json({ message: "Custom set deleted successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// Get all sets
-exports.getAllCustomSets = async (req, res) => {
+exports.getAllCustomSets = async (req, res, next) => {
   try {
     const customSets = await CustomSet.find();
     res.json(customSets);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// Get a single set by ID
-exports.getCustomSetById = async (req, res) => {
+exports.getCustomSetById = async (req, res, next) => {
   try {
     const { id } = req.params;
-
     const customSet = await CustomSet.findById(id);
 
     if (!customSet) {
-      return res.status(404).json({ message: "Custom set not found" });
+      throw new CustomError("Custom set not found", 404);
     }
 
     res.json(customSet);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// Add a skill to a set
-exports.addSkillToCustomSet = async (req, res) => {
+exports.addSkillToCustomSet = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, votes } = req.body;
 
-    const updatedCustomSet = await CustomSet.findByIdAndUpdate(
-      id,
-      { $push: { skills: { name, votes } } },
-      { new: true }
-    );
+    if (!name || !votes) {
+      throw new CustomError("Name and votes are required", 400);
+    }
+
+    const updatedCustomSet = await CustomSet.findByIdAndUpdate(id, { $push: { skills: { name, votes } } }, { new: true });
 
     if (!updatedCustomSet) {
-      return res.status(404).json({ message: "Custom set not found" });
+      throw new CustomError("Custom set not found", 404);
     }
 
     res.json(updatedCustomSet);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// Update skill votes
-exports.updateSkillVotes = async (req, res) => {
+exports.updateSkillVotes = async (req, res, next) => {
   try {
     const { setId } = req.params;
     const { votes, skillId } = req.body;
 
-    const updatedCustomSet = await CustomSet.findOneAndUpdate(
-      { _id: setId, "skills._id": skillId },
-      { $set: { "skills.$.votes": votes } },
-      { new: true }
-    );
+    if (!votes) {
+      throw new CustomError("Votes are required", 400);
+    }
+
+    const updatedCustomSet = await CustomSet.findOneAndUpdate({ _id: setId, "skills._id": skillId }, { $set: { "skills.$.votes": votes } }, { new: true });
 
     if (!updatedCustomSet) {
-      return res.status(404).json({ message: "Custom set or skill not found" });
+      throw new CustomError("Custom set or skill not found", 404);
     }
 
     res.json(updatedCustomSet);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
 
-// Update/delete skill tags
-exports.updateSkillTags = async (req, res) => {
+exports.updateSkillTags = async (req, res, next) => {
   try {
     const { setId, skillId } = req.params;
     const { tags } = req.body;
 
-    const updatedCustomSet = await CustomSet.findOneAndUpdate(
-      { _id: setId, "skills._id": skillId },
-      { $set: { "skills.$.tags": tags } },
-      { new: true }
-    );
+    if (!tags) {
+      throw new CustomError("Tags are required", 400);
+    }
+
+    const updatedCustomSet = await CustomSet.findOneAndUpdate({ _id: setId, "skills._id": skillId }, { $set: { "skills.$.tags": tags } }, { new: true });
 
     if (!updatedCustomSet) {
-      return res.status(404).json({ message: "Custom set or skill not found" });
+      throw new CustomError("Custom set or skill not found", 404);
     }
 
     res.json(updatedCustomSet);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 };
