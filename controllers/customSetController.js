@@ -119,6 +119,27 @@ exports.addSkillToCustomSet = async (req, res, next) => {
     }
 };
 
+exports.removeSkillFromCustomSet = async (req, res, next) => {
+    try {
+        const {setId, skillId} = req.params;
+        const userId = req.userId;
+
+        const updatedCustomSet = await CustomSet.findOneAndUpdate(
+            {_id: setId, userId: userId},
+            {$pull: {skills: {_id: skillId}}},
+            {new: true}
+        );
+
+        if (!updatedCustomSet) {
+            throw new CustomError("Custom set or skill not found or unauthorized", 404);
+        }
+
+        res.json(updatedCustomSet);
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.updateSkillVotes = async (req, res, next) => {
     try {
         const {setId, skillId} = req.params;
@@ -128,7 +149,7 @@ exports.updateSkillVotes = async (req, res, next) => {
         if (votes === undefined || votes < 0) {
             throw new CustomError("Votes must be 0 or greater", 400);
         }
-        
+
         const updatedCustomSet = await CustomSet.findOneAndUpdate(
             {_id: setId, userId: userId, "skills._id": skillId},
             {$set: {"skills.$.votes": votes}},

@@ -14,6 +14,8 @@ router.get("/:id", customSetController.getCustomSetById);
 
 router.put("/:id/add-skill", customSetController.addSkillToCustomSet);
 
+router.delete("/:setId/remove-skill/:skillId", customSetController.removeSkillFromCustomSet);
+
 router.put("/:setId/update-votes/:skillId", customSetController.updateSkillVotes);
 
 router.put(
