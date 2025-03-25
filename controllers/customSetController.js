@@ -166,27 +166,72 @@ exports.updateSkillVotes = async (req, res, next) => {
     }
 };
 
-exports.updateSkillTags = async (req, res, next) => {
+exports.addSkillTag = async (req, res, next) => {
     try {
         const {setId, skillId} = req.params;
-        const {tags} = req.body;
+        const {tag} = req.body;
         const userId = req.userId;
 
-        if (!tags) {
-            throw new CustomError("Tags are required", 400);
+        if (!tag) {
+            throw new CustomError("Tag is required", 400);
         }
 
-        const updatedCustomSet = await CustomSet.findOneAndUpdate(
-            {_id: setId, userId: userId, "skills._id": skillId},
-            {$set: {"skills.$.tags": tags}},
-            {new: true}
-        );
-
-        if (!updatedCustomSet) {
+        const customSet = await CustomSet.findOne({_id: setId, userId: userId});
+        if (!customSet) {
             throw new CustomError("Custom set or skill not found or unauthorized", 404);
         }
 
-        res.json(updatedCustomSet);
+        const skillToUpdate = customSet.skills.find(skill => skill._id.toString() === skillId);
+        if (!skillToUpdate) {
+            throw new CustomError("Custom set or skill not found or unauthorized", 404);
+        }
+
+        const normalizedTag = tag.toString().trim().toLowerCase().replace(/[^a-z0-9\s]/g, '');
+
+        if (skillToUpdate.tags.includes(normalizedTag)) {
+            throw new CustomError(`Tag '${normalizedTag}' already exists for this skill`, 400);
+        } else {
+            skillToUpdate.tags.push(normalizedTag);
+        }
+
+        await customSet.save();
+
+        res.json(customSet);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.removeSkillTag = async (req, res, next) => {
+    try {
+        const {setId, skillId, tag} = req.params;
+        const userId = req.userId;
+
+        if (!tag) {
+            throw new CustomError("Tag is required", 400);
+        }
+
+        const customSet = await CustomSet.findOne({_id: setId, userId: userId});
+        if (!customSet) {
+            throw new CustomError("Custom set or skill not found or unauthorized", 404);
+        }
+
+        const skillToUpdate = customSet.skills.find(skill => skill._id.toString() === skillId);
+        if (!skillToUpdate) {
+            throw new CustomError("Custom set or skill not found or unauthorized", 404);
+        }
+
+        const tagIndex = skillToUpdate.tags.indexOf(tag.toLowerCase());
+
+        if (tagIndex > -1) {
+            skillToUpdate.tags.splice(tagIndex, 1);
+        } else {
+            throw new CustomError("Tag not found in this skill", 404);
+        }
+
+        await customSet.save();
+
+        res.json(customSet);
     } catch (error) {
         next(error);
     }
