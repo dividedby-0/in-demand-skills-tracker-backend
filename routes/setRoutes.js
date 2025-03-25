@@ -14,11 +14,11 @@ router.get("/:id", customSetController.getCustomSetById);
 
 router.put("/:id/add-skill", customSetController.addSkillToCustomSet);
 
-router.put("/:setId/update-votes", customSetController.updateSkillVotes);
+router.put("/:setId/update-votes/:skillId", customSetController.updateSkillVotes);
 
 router.put(
-  "/:setId/update-skill-tags/:skillId",
-  customSetController.updateSkillTags
+    "/:setId/update-skill-tags/:skillId",
+    customSetController.updateSkillTags
 );
 
 module.exports = router;

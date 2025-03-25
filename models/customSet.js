@@ -1,32 +1,23 @@
 const mongoose = require("mongoose");
 
-const customSetSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    skills: [
-      {
+const customSetSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId, ref: "User",
+        required: true
+    }, name: {
+        type: String, required: true,
+    }, skills: [{
         name: {
-          type: String,
-          required: true,
+            type: String, required: true,
+        }, votes: {
+            type: Number, default: 0,
+        }, tags: {
+            type: [String], default: [],
         },
-        votes: {
-          type: Number,
-          default: 0,
-        },
-        tags: {
-          type: [String],
-          default: [],
-        },
-      },
-    ],
-  },
-  {
+    },],
+}, {
     collection: "customSets",
-  }
-);
+});
 
 const CustomSet = mongoose.model("CustomSet", customSetSchema);
 
