@@ -4,10 +4,16 @@ const CustomError = require("../errors");
 exports.createCustomSet = async (req, res, next) => {
     try {
         const {name} = req.body;
+        const sanitized_name = name.trim();
         const userId = req.userId;
 
-        if (!name) {
-            throw new CustomError("Name is required", 400);
+        const existingCustomSet = await CustomSet.findOne({
+            name: {$regex: `^${sanitized_name}$`, $options: 'i'},
+            userId
+        });
+
+        if (existingCustomSet) {
+            throw new CustomError(`Location or company with name '${name}' already exists`, 400);
         }
 
         const newCustomSet = new CustomSet({
@@ -30,11 +36,7 @@ exports.updateCustomSet = async (req, res, next) => {
             throw new CustomError("Name is required", 400);
         }
 
-        const updatedCustomSet = await CustomSet.findOneAndUpdate(
-            {_id: id, userId: userId},
-            {name},
-            {new: true}
-        );
+        const updatedCustomSet = await CustomSet.findOneAndUpdate({_id: id, userId: userId}, {name}, {new: true});
 
         if (!updatedCustomSet) {
             throw new CustomError("Custom set not found or unauthorized", 404);
@@ -52,8 +54,7 @@ exports.deleteCustomSet = async (req, res, next) => {
         const userId = req.userId;
 
         const deletedCustomSet = await CustomSet.findOneAndDelete({
-            _id: id,
-            userId: userId,
+            _id: id, userId: userId,
         });
 
         if (!deletedCustomSet) {
@@ -97,21 +98,30 @@ exports.addSkillToCustomSet = async (req, res, next) => {
     try {
         const {id} = req.params;
         const {name, votes} = req.body;
+        const sanitized_name = name.trim();
         const userId = req.userId;
 
-        if (!name || !votes) {
+        if (!sanitized_name || !votes) {
             throw new CustomError("Name and votes are required", 400);
         }
 
-        const updatedCustomSet = await CustomSet.findOneAndUpdate(
-            {_id: id, userId: userId},
-            {$push: {skills: {name, votes}}},
-            {new: true}
-        );
-
-        if (!updatedCustomSet) {
-            throw new CustomError("Custom set not found or unauthorized", 404);
+        const existingSkill = await CustomSet.findOne({
+            _id: id,
+            userId: userId,
+            "skills.name": {$regex: `^${sanitized_name}$`, $options: 'i'}
+        });
+        if (existingSkill) {
+            throw new CustomError(`Skill with name '${sanitized_name}' already exists`, 400);
         }
+
+        const updatedCustomSet = await CustomSet.findOneAndUpdate({_id: id, userId: userId}, {
+            $push: {
+                skills: {
+                    name: sanitized_name,
+                    votes
+                }
+            }
+        }, {new: true});
 
         res.json(updatedCustomSet);
     } catch (error) {
@@ -124,11 +134,10 @@ exports.removeSkillFromCustomSet = async (req, res, next) => {
         const {setId, skillId} = req.params;
         const userId = req.userId;
 
-        const updatedCustomSet = await CustomSet.findOneAndUpdate(
-            {_id: setId, userId: userId},
-            {$pull: {skills: {_id: skillId}}},
-            {new: true}
-        );
+        const updatedCustomSet = await CustomSet.findOneAndUpdate({
+            _id: setId,
+            userId: userId
+        }, {$pull: {skills: {_id: skillId}}}, {new: true});
 
         if (!updatedCustomSet) {
             throw new CustomError("Custom set or skill not found or unauthorized", 404);
@@ -150,11 +159,11 @@ exports.updateSkillVotes = async (req, res, next) => {
             throw new CustomError("Votes must be 0 or greater", 400);
         }
 
-        const updatedCustomSet = await CustomSet.findOneAndUpdate(
-            {_id: setId, userId: userId, "skills._id": skillId},
-            {$set: {"skills.$.votes": votes}},
-            {new: true}
-        );
+        const updatedCustomSet = await CustomSet.findOneAndUpdate({
+            _id: setId,
+            userId: userId,
+            "skills._id": skillId
+        }, {$set: {"skills.$.votes": votes}}, {new: true});
 
         if (!updatedCustomSet) {
             throw new CustomError("Custom set or skill not found or unauthorized", 404);
