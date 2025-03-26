@@ -44,7 +44,7 @@ exports.register = async (req, res, next) => {
         const user = new User({username, email, password: hashedPassword});
         await user.save();
 
-        const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY, {expiresIn: '1h'});
+        const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY, {expiresIn: '24h'});
 
         res.json({token});
     } catch (error) {
@@ -59,16 +59,16 @@ exports.login = async (req, res, next) => {
         const user = await User.findOne({username});
 
         if (!user) {
-            throw new CustomError('Invalid credentials', 401);
+            throw new CustomError('Invalid credentials', 403);
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
-            throw new CustomError('Invalid credentials', 401);
+            throw new CustomError('Invalid credentials', 403);
         }
 
-        const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY, {expiresIn: '1h'});
+        const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY, {expiresIn: '24h'});
 
         res.json({token});
     } catch (error) {
