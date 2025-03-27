@@ -18,6 +18,8 @@ router.delete("/:setId/remove-skill/:skillId", customSetController.removeSkillFr
 
 router.put("/:setId/update-votes/:skillId", customSetController.updateSkillVotes);
 
+router.get('/:userId/tags', customSetController.getAllTags);
+
 router.post("/:setId/add-tag/:skillId", customSetController.addSkillTag);
 
 router.delete("/:setId/remove-tag/:skillId/:tag", customSetController.removeSkillTag);

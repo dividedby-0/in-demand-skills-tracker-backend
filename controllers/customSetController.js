@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const CustomSet = require("../models/customSet");
 const CustomError = require("../errors");
 
@@ -170,6 +171,25 @@ exports.updateSkillVotes = async (req, res, next) => {
         }
 
         res.json(updatedCustomSet);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getAllTags = async (req, res, next) => {
+    try {
+        const userId = new mongoose.Types.ObjectId(req.userId);
+
+        const result = await CustomSet.aggregate([
+            {$match: {userId: userId}},
+            {$unwind: "$skills"},
+            {$unwind: {path: "$skills.tags", preserveNullAndEmptyArrays: false}},
+            {$group: {_id: null, tags: {$addToSet: "$skills.tags"}}},
+            {$project: {_id: 0, tags: 1}}
+        ]);
+
+        res.json(result.length ? result[0].tags : []);
+
     } catch (error) {
         next(error);
     }

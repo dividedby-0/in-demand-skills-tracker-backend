@@ -38,15 +38,17 @@ A live version can be found [here](https://vermillion-khapse-9e6bb3.netlify.app)
 
 ## ⚙️ Backend
 
-- Developed with **Node.js** and **Express**
+- Developed with **Node.js**, **Express.js** and Mongoose
 - Provides secure APIs for authentication using **JWT**
-- Handles skill/user management through RESTful endpoints
-- Data stored in **MongoDB** database
-- Backend and database hosted on **Railway**
+- Handles skill/user/tag management through RESTful endpoints
+- Data stored in **MongoDB** database hosted on **MongoDB Atlas**
+- Backend hosted on **Railway**
 
 # 🚀 Future plans
 
 - [ ] Add a skill search feature to allow users to find skills by name or location.
 
 # 📝 License
-This project is licensed under the [MIT License](https://github.com/dividedby-0/in-demand-skills-tracker-frontend/blob/main/LICENSE).
+
+This project is licensed under
+the [MIT License](https://github.com/dividedby-0/in-demand-skills-tracker-frontend/blob/main/LICENSE).
