@@ -12,7 +12,9 @@ router.get("/", customSetController.getAllCustomSets);
 
 router.get("/:id", customSetController.getCustomSetById);
 
-router.put("/:id/add-skill", customSetController.addSkillToCustomSet);
+router.get("/:userId/skills", customSetController.getAllSkills);
+
+router.post("/:customSetId/add-skill", customSetController.addSkillToCustomSet);
 
 router.delete("/:setId/remove-skill/:skillId", customSetController.removeSkillFromCustomSet);
 

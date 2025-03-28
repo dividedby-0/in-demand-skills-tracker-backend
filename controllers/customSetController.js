@@ -95,9 +95,27 @@ exports.getCustomSetById = async (req, res, next) => {
     }
 };
 
+exports.getAllSkills = async (req, res, next) => {
+    try {
+        const userId = new mongoose.Types.ObjectId(req.userId);
+
+        const result = await CustomSet.aggregate([
+            {$match: {userId: userId}},
+            {$unwind: "$skills"},
+            {$group: {_id: "$skills.name"}},
+            {$group: {_id: null, skills: {$addToSet: "$_id"}}}
+        ]);
+
+        res.json(result.length ? result[0].skills : []);
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 exports.addSkillToCustomSet = async (req, res, next) => {
     try {
-        const {id} = req.params;
+        const {customSetId} = req.params;
         const {name, votes} = req.body;
         const sanitized_name = name.trim();
         const userId = req.userId;
@@ -107,7 +125,7 @@ exports.addSkillToCustomSet = async (req, res, next) => {
         }
 
         const existingSkill = await CustomSet.findOne({
-            _id: id,
+            _id: customSetId,
             userId: userId,
             "skills.name": {$regex: `^${sanitized_name}$`, $options: 'i'}
         });
@@ -115,7 +133,7 @@ exports.addSkillToCustomSet = async (req, res, next) => {
             throw new CustomError(`Skill with name '${sanitized_name}' already exists`, 400);
         }
 
-        const updatedCustomSet = await CustomSet.findOneAndUpdate({_id: id, userId: userId}, {
+        const updatedCustomSet = await CustomSet.findOneAndUpdate({_id: customSetId, userId: userId}, {
             $push: {
                 skills: {
                     name: sanitized_name,
